@@ -57,7 +57,7 @@ public class Ex_exam1 {
 			}
 
 			if (cmd.equals("update")) {
-			
+
 				System.out.println("수정할 게시물 선택 : ");
 				int targetId = sc.nextInt();
 				Article target = dao.getArticleById(targetId);
@@ -83,8 +83,8 @@ public class Ex_exam1 {
 				if (target == null) {
 					System.out.println("게시물이 존재하지 않습니다.");
 				} else {
-					articles.remove(target);
-
+					dao.removeArticle(target);
+							
 				}
 			}
 
@@ -105,20 +105,27 @@ public class Ex_exam1 {
 			if (cmd.equals("search")) {
 				ArrayList<Article> articles = dao.getArticles();
 
-				System.out.println("명령어를 입력해주세요.");
-				String search_cmd = sc.next();
-				for (int i = 0; i < articles.size(); i++) {
-					if (articles.get(i).getTitle().contains("serch_cmd")) {
-						System.out.println("==== " + articles.get(i) + " ====");
-						System.out.println("번호 : " + target.getId());
-						System.out.println("제목 : " + target.getTitle());
-						System.out.println("내용 : " + target.getBody());
-						System.out.println("===============");
-					}
-				}
+				System.out.print("검색항목을 선택해주세요(1. 제목, 2. 내용, 3. 제목 + 내용, 4. 작성자) : ");
+				int key_num = sc.nextInt();
+				System.out.print("검색 키워드를 입력해주세요.");
+				String keyword = sc.next();
+				ArrayList<Article> searchedArticles = dao.getSearchedArticlesByCmd(key_num, keyword);
+				
+				printArticles(searchedArticles);
+				
+		
 			}
 		}
-
 	}
-
+	private static void printArticles(ArrayList<Article> articleList) {
+		for (int i = 0; i < articleList.size(); i++) {
+			Article article = articleList.get(i);
+			System.out.println("번호 : " + article.getId());
+			System.out.println("제목 : " + article.getTitle());
+			System.out.println("등록날짜 : " + article.getRegDate());
+			System.out.println("작성자 : " + article.getNickname());
+			System.out.println("조회수 : " + article.getHit());
+			System.out.println("===================");
+		}
+	}
 }
