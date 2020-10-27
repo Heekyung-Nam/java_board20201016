@@ -18,38 +18,20 @@ public class ArticleDao {
 		articles.add(a3);
 	}
 
-	public ArrayList<Article> getSearchedArticlesByCmd(int key_num, String keyword) {
+	public ArrayList<Article> getSearchedArticlesByFlag(int flag, String keyword) {
 
 		ArrayList<Article> searchedArticles = new ArrayList<>();
 
-		if (key_num == 1) {
-			for (int i = 0; i < articles.size(); i++) {
-				if (articles.get(i).getTitle().contains(keyword)) {
-					searchedArticles.add(articles.get(i));
-				} else if (key_num == 2) {
-					for (i = 0; i < articles.size(); i++) {
-						if (articles.get(i).getBody().contains(keyword)) {
-							searchedArticles.add(articles.get(i));
-						} else if (key_num == 3) {
-							for (i = 0; i < articles.size(); i++) {
-								if (articles.get(i).getBody().contains(keyword)
-										|| articles.get(i).getTitle().contains(keyword)) {
-									searchedArticles.add(articles.get(i));
-								} else {
-									for (i = 0; i < articles.size(); i++) {
-										if (articles.get(i).getNickname().contains(keyword)) {
-											searchedArticles.add(articles.get(i));
-										}
-									}
-
-								}
-							}
-						}
-
-					}
-				}
+		
+		for(int i = 0; i <articles.size(); i++) {
+			Article article = articles.get(i);
+			String str = article.getPropertiesByFlag(flag);
+			if(str.contains(keyword)) {
+				searchedArticles.add(article);
 			}
 		}
+		
+
 		return searchedArticles;
 
 	}
@@ -66,7 +48,7 @@ public class ArticleDao {
 		articles.remove(a);
 	}
 
-	private static String getCurrentDate() {
+	public static String getCurrentDate() {
 		SimpleDateFormat format1 = new SimpleDateFormat("yyyy.MM.dd");
 		Date time = new Date();
 		String time1 = format1.format(time);
@@ -75,7 +57,7 @@ public class ArticleDao {
 	}
 
 	// Article 버전
-	public static Article getArticleById(int targetId) {
+	public Article getArticleById(int targetId) {
 		for (int i = 0; i < articles.size(); i++) {
 			int id = articles.get(i).getId();
 			if (id == targetId) {
@@ -89,4 +71,6 @@ public class ArticleDao {
 	public ArrayList<Article> getArticles() {
 		return articles;
 	}
+
+	
 }
