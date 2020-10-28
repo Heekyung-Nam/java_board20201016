@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class ArticleDao {
 
-	private static ArrayList<Article> articles;
+	private ArrayList<Article> articles;
 	private int no = 4;
 
 	public ArticleDao() {
@@ -48,7 +48,7 @@ public class ArticleDao {
 		articles.remove(a);
 	}
 
-	public static String getCurrentDate() {
+	private String getCurrentDate() {
 		SimpleDateFormat format1 = new SimpleDateFormat("yyyy.MM.dd");
 		Date time = new Date();
 		String time1 = format1.format(time);

@@ -3,14 +3,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Ex_exam1 {
+	static ArticleDao articleDao = new ArticleDao();
+	static ReplyDao replyDao = new ReplyDao();
+	static ArrayList<Member> member = new ArrayList<>();
+	static Member membership = new Member();
+
 
 	public static void main(String[] args) {
 
 		Scanner sc = new Scanner(System.in);
-
-		ArticleDao dao = new ArticleDao();
-
-		ArrayList<Article> reple = new ArrayList<>();
 
 		int no = 4;
 		int read_num = 0;
@@ -36,13 +37,14 @@ public class Ex_exam1 {
 				System.out.println("게시물 내용을 입력해주세요 :");
 				String body = sc.next();
 				a.setBody(body);
+				a.setNickname("익명");
 
-				dao.insertArticle(a);
+				articleDao.insertArticle(a);
 				System.out.println("게시물이 등록되었습니다.");
 			}
 
 			if (cmd.equals("list")) {
-				ArrayList<Article> articles = dao.getArticles();
+				ArrayList<Article> articles = articleDao.getArticles();
 
 				for (int i = 0; i < articles.size(); i++) {
 					Article article = articles.get(i);
@@ -52,15 +54,13 @@ public class Ex_exam1 {
 					System.out.println("조회수 : " + read_num);
 					System.out.println("===================");
 				}
-				read_num++;
-
 			}
 
 			if (cmd.equals("update")) {
 
 				System.out.println("수정할 게시물 선택 : ");
 				int targetId = sc.nextInt();
-				Article target = dao.getArticleById(targetId);
+				Article target = articleDao.getArticleById(targetId);
 				if (target == null) {
 					System.out.println("없는 게시물입니다.");
 				} else {
@@ -77,13 +77,15 @@ public class Ex_exam1 {
 			}
 
 			if (cmd.equals("delete")) {
+				ArrayList<Article> articles = articleDao.getArticles();
+
 				System.out.println("삭제할 게시물 선택 : ");
 				int targetId = sc.nextInt();
-				Article target = dao.getArticleById(targetId);
+				Article target = articleDao.getArticleById(targetId);
 				if (target == null) {
 					System.out.println("게시물이 존재하지 않습니다.");
 				} else {
-					dao.removeArticle(target);
+					articleDao.removeArticle(target);
 
 				}
 			}
@@ -91,16 +93,12 @@ public class Ex_exam1 {
 			if (cmd.equals("read")) {
 				System.out.println("읽을 게시물 선택 : ");
 				int targetId = sc.nextInt();
-				Article target = dao.getArticleById(targetId);
+				Article target = articleDao.getArticleById(targetId);
 				if (target == null) {
 					System.out.println("게시물이 존재하지 않습니다.");
 				} else {
-					System.out.println("==== " + target.getId() + " ====");
-					System.out.println("번호 : " + target.getId());
-					System.out.println("제목 : " + target.getTitle());
-					System.out.println("내용 : " + target.getBody());
-					System.out.println("===============");
-					printReple(reple);
+					target.setHit(target.getHit() + 1);
+					printArticle(target);
 
 				}
 				while (true) {
@@ -108,15 +106,17 @@ public class Ex_exam1 {
 					int readCmd = sc.nextInt();
 					Article str = new Article();
 					if (readCmd == 1) {
-						System.out.println("댓글 기능");
-						System.out.print(" 댓글 내용을 입력해주세요 : ");
-						str.setBody(sc.next());
-						str.setRegDate(dao.getCurrentDate());
-						str.setNickname("익명");
-						reple.add(str);
+						Reply r = new Reply();
+
+						System.out.println("댓글 내용을 입력해주세요:");
+						String body = sc.next();
+						r.setParentId(target.getId());
+						r.setBody(body);
+						r.setNickname("익명");
+
+						replyDao.insertReply(r);
 						System.out.println("댓글이 등록되었습니다.");
-						printTargetArticles(target);
-						printReple(reple);
+						printArticle(target);
 
 //						for (int i = 0; i < reple.size(); i++) {
 //							System.out.println(reple.get(i).getBody());
@@ -140,10 +140,49 @@ public class Ex_exam1 {
 				int flag = sc.nextInt();
 				System.out.print("검색 키워드를 입력해주세요.");
 				String keyword = sc.next();
-				ArrayList<Article> searchedArticles = dao.getSearchedArticlesByFlag(flag, keyword);
+				ArrayList<Article> searchedArticles = articleDao.getSearchedArticlesByFlag(flag, keyword);
+				searchedArticles = articleDao.getSearchedArticlesByFlag(flag, keyword);
 
 				printArticles(searchedArticles);
 
+			}
+			if (cmd.equals("signup")) {
+
+				System.out.println("==== 회원 가입을 진행합니다 ====");
+				System.out.print("아이디를 입력해주세요 : ");
+				String id = sc.next();
+				System.out.print("비밀번호를 입력해주세요 : ");
+				String password = sc.next();
+				System.out.print("닉네임을 입력해주세요 : ");
+				String nickname = sc.next();
+				membership.setId(id);
+				membership.setPassword(password);
+				membership.setNickname(nickname);
+				member.add(membership);
+				System.out.println("==== 회원가입이 완료되었습니다. ====");
+				showAllofMember(member);
+			}
+			if (cmd.equals("signin")) {
+				System.out.print("아이디 : ");
+				String id = sc.next();
+				System.out.print("비밀번호 : ");
+				String password = sc.next();
+				
+				for(int i = 0; i< member.size(); i++) {
+					if(member.get(i).getID() || member.get(i).getID())
+				}
+				
+				
+				
+				
+				System.out.print("닉네임을 입력해주세요 : ");
+				String nickname = sc.next();
+				membership.setId(id);
+				membership.setPassword(password);
+				membership.setNickname(nickname);
+				member.add(membership);
+				System.out.println("==== 회원가입이 완료되었습니다. ====");
+				showAllofMember(member);
 			}
 		}
 	}
@@ -160,23 +199,36 @@ public class Ex_exam1 {
 		}
 	}
 
-	private static void printTargetArticles(Article target) {
-		if (target == null) {
-			System.out.println("게시물이 존재하지 않습니다.");
-		} else {
-			System.out.println("==== " + target.getId() + " ====");
-			System.out.println("번호 : " + target.getId());
-			System.out.println("제목 : " + target.getTitle());
-			System.out.println("내용 : " + target.getBody());
-			System.out.println("===============");
+	private static void printReplies(ArrayList<Reply> replyList) {
+		for (int i = 0; i < replyList.size(); i++) {
+			Reply reply = replyList.get(i);
+			System.out.println("내용 : " + reply.getBody());
+			System.out.println("작성자 : " + reply.getNickname());
+			System.out.println("등록날짜 : " + reply.getRegDate());
+			System.out.println("===================");
 		}
 	}
 
-	private static void printReple(ArrayList<Article> reple) {
-		for (int i = 0; i < reple.size(); i++) {
-			System.out.println(reple.get(i).getBody());
-			System.out.println(reple.get(i).getRegDate());
-			System.out.println(reple.get(i).getNickname());
-		}
+	private static void printArticle(Article target) {
+		System.out.println("==== " + target.getId() + " ====");
+		System.out.println("번호 : " + target.getId());
+		System.out.println("제목 : " + target.getTitle());
+		System.out.println("내용 : " + target.getBody());
+		System.out.println("등록날짜 : " + target.getRegDate());
+		System.out.println("조회수 : " + target.getHit());
+		System.out.println("===============");
+		System.out.println("================댓글==============");
+
+		ArrayList<Reply> replies = replyDao.getRepliesByParentId(target.getId());
+		printReplies(replies);
+	}
+	private static void showAllofMember(ArrayList<Member> member) {
+		for(int i = 0; i < member.size(); i++) {
+		System.out.println("==== " + member.get(i).getId() + " ====");
+		System.out.println("아이디 : " + member.get(i).getId());
+		System.out.println("비밀번호 : " + member.get(i).getPassword());
+		System.out.println("닉네임 : " + member.get(i).getNickname());
+		System.out.println("===============");
+				}
 	}
 }
