@@ -5,20 +5,27 @@ import java.util.Scanner;
 public class Ex_exam1 {
 	static ArticleDao articleDao = new ArticleDao();
 	static ReplyDao replyDao = new ReplyDao();
-	static ArrayList<Member> member = new ArrayList<>();
-	static Member membership = new Member();
-
+	static MemberDao memberDao = new MemberDao();
 
 	public static void main(String[] args) {
 
 		Scanner sc = new Scanner(System.in);
 
+
 		int no = 4;
 		int read_num = 0;
+		int signin_flag = 1; 
 
 		while (true) {
+			memberDao.getMembers();
+			if(signin_flag == 1) {
 			System.out.print("명령어 입력 : ");
+			} else {
+			System.out.print("명령어 입력 : " + "[" + memberDao.getMembers().);
+					
+			}
 			String cmd = sc.next();
+
 
 			if (cmd.equals("exit")) {
 				System.out.println("종료");
@@ -142,12 +149,12 @@ public class Ex_exam1 {
 				String keyword = sc.next();
 				ArrayList<Article> searchedArticles = articleDao.getSearchedArticlesByFlag(flag, keyword);
 				searchedArticles = articleDao.getSearchedArticlesByFlag(flag, keyword);
-
+				memberDao.getMembers();
 				printArticles(searchedArticles);
 
 			}
 			if (cmd.equals("signup")) {
-
+				Member m = new Member();
 				System.out.println("==== 회원 가입을 진행합니다 ====");
 				System.out.print("아이디를 입력해주세요 : ");
 				String id = sc.next();
@@ -155,34 +162,31 @@ public class Ex_exam1 {
 				String password = sc.next();
 				System.out.print("닉네임을 입력해주세요 : ");
 				String nickname = sc.next();
-				membership.setId(id);
-				membership.setPassword(password);
-				membership.setNickname(nickname);
-				member.add(membership);
+				m.setLoginId(id);
+				m.setLoginPw(password);
+				m.setNickname(nickname);
+				memberDao.insertMember(m);
 				System.out.println("==== 회원가입이 완료되었습니다. ====");
-				showAllofMember(member);
 			}
 			if (cmd.equals("signin")) {
+				
+				memberDao.getMembers();
+				showAllofMember(memberDao.getMembers());
+				
 				System.out.print("아이디 : ");
 				String id = sc.next();
 				System.out.print("비밀번호 : ");
 				String password = sc.next();
-				
-				for(int i = 0; i< member.size(); i++) {
-					if(member.get(i).getID() || member.get(i).getID())
+
+				for (int i = 0; i < memberDao.getMembers().size(); i++) {
+					if (id.equals(memberDao.getMembers().get(i).getLoginId()) && password.equals(memberDao.getMembers().get(i).getLoginPw())) {
+						System.out.println(memberDao.getMembers().get(i).getNickname() + "님 환영합니다!");
+						signin_flag = -1;
+					} else {
+						System.out.println("비밀번호를 틀렸거나 잘못된 회원정보입니다.");
+					}
+					break;
 				}
-				
-				
-				
-				
-				System.out.print("닉네임을 입력해주세요 : ");
-				String nickname = sc.next();
-				membership.setId(id);
-				membership.setPassword(password);
-				membership.setNickname(nickname);
-				member.add(membership);
-				System.out.println("==== 회원가입이 완료되었습니다. ====");
-				showAllofMember(member);
 			}
 		}
 	}
@@ -222,13 +226,18 @@ public class Ex_exam1 {
 		ArrayList<Reply> replies = replyDao.getRepliesByParentId(target.getId());
 		printReplies(replies);
 	}
-	private static void showAllofMember(ArrayList<Member> member) {
-		for(int i = 0; i < member.size(); i++) {
-		System.out.println("==== " + member.get(i).getId() + " ====");
-		System.out.println("아이디 : " + member.get(i).getId());
-		System.out.println("비밀번호 : " + member.get(i).getPassword());
-		System.out.println("닉네임 : " + member.get(i).getNickname());
-		System.out.println("===============");
-				}
+
+	private static void showAllofMember(ArrayList<Member> members) {
+		memberDao.getMembers();
+		for (int i = 0; i < members.size(); i++) {
+			System.out.println("==== " + members.get(i).getId() + " ====");
+			System.out.println("아이디 : " + members.get(i).getLoginId());
+			System.out.println("비밀번호 : " + members.get(i).getLoginPw());
+			System.out.println("닉네임 : " + members.get(i).getNickname());
+			System.out.println("===============");
+		}
 	}
+	
+	return memeber;
+	
 }
