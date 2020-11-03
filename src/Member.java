@@ -5,7 +5,9 @@ public class Member {
 	private String loginPw;
 	private String nickname;
 	private String regDate;
+	private int clickHitNum;
 
+	
 	public Member() {
 
 	}
@@ -63,6 +65,14 @@ public class Member {
 
 	public void setRegDate(String regDate) {
 		this.regDate = regDate;
+	}
+
+	public int getClickHitNum() {
+		return clickHitNum;
+	}
+
+	public void setClickHitNum(int clickHitNum) {
+		this.clickHitNum = clickHitNum;
 	}
 
 }

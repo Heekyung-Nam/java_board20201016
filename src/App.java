@@ -59,7 +59,7 @@ public class App {
 					Article article = articles.get(i);
 					System.out.println("번호 : " + article.getId());
 					System.out.println("제목 : " + article.getTitle());
-					System.out.println("작성자 : " + wrighter.getNickname());
+					System.out.println("작성자 : " + article.getNickname());
 					System.out.println("조회수 : " + read_num);
 					System.out.println("===================");
 				}
@@ -100,6 +100,11 @@ public class App {
 				System.out.println("상세보기 할 게시물 선택 : ");
 				int targetId = Integer.parseInt(sc.nextLine());
 				Article target = articleDao.getArticleById(targetId);
+
+				Member clickHitMember = loginedMember;
+				clickHitMember.setClickHitNum(0);
+				
+				
 				if (target == null) {
 					System.out.println("게시물이 존재하지 않습니다.");
 				} else {
@@ -130,12 +135,35 @@ public class App {
 
 						} else if (readCmd == 2) {
 							System.out.println("좋아요 기능");
+							ArrayList articles = articleDao.getArticles();
+
+							if (!isLogin()) {
+								continue;
+								
+							} else {
+								clickHitMember.setClickHitNum(clickHitMember.getClickHitNum() + 1);
+								target.setHit(target.getHit() + 1);
+							}
+
+							if (clickHitMember.getClickHitNum() == 2) {
+								clickHitMember.setClickHitNum(clickHitMember.getClickHitNum() - 1);
+								target.setHit(target.getHit() - 1);
+							}
+
+							printArticles(articles);
+
 						} else if (readCmd == 3) {
 							System.out.println("수정 기능");
+
 							if (!loginedMember.getLoginId().equals(wrighter.getLoginId())) {
+								if (!isLogin()) {
+									continue;
+								}
 								System.out.println("자신의 게시물만 수정/삭제 할 수 있습니다.");
 							} else {
-								update(target);
+								ArrayList article = articleDao.getArticles();
+								updateArticle(target);
+								printArticles(article);
 								continue;
 							}
 
@@ -248,7 +276,7 @@ public class App {
 		return false;
 	}
 
-	private Article update(Article target) {
+	private Article updateArticle(Article target) {
 		if (target == null) {
 			System.out.println("없는 게시물입니다.");
 		} else {
@@ -261,6 +289,6 @@ public class App {
 			target.setTitle(newTitle);
 			target.setBody(newBody);
 		}
-	return target;
+		return target;
 	}
 }

@@ -6,6 +6,7 @@ public class MemberDao {
 
 	private ArrayList<Member> members;
 	private int no = 4;
+	private int hitNum = 0;
 
 	public MemberDao() {
 		members = new ArrayList<>();
@@ -49,5 +50,12 @@ public class MemberDao {
 
 		return null;
 
+	}
+	
+	public int clickHitNum(Member clickHitMember) {
+		clickHitMember.setHitNum(hitNum+1);
+				
+		return hitNum;
+				
 	}
 }
