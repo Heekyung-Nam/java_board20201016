@@ -52,10 +52,4 @@ public class MemberDao {
 
 	}
 	
-	public int clickHitNum(Member clickHitMember) {
-		clickHitMember.setHitNum(hitNum+1);
-				
-		return hitNum;
-				
-	}
 }
