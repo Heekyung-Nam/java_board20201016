@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Scanner;
 
 public class App {
@@ -103,8 +105,7 @@ public class App {
 
 				Member clickHitMember = loginedMember;
 				clickHitMember.setClickHitNum(0);
-				
-				
+
 				if (target == null) {
 					System.out.println("게시물이 존재하지 않습니다.");
 				} else {
@@ -139,7 +140,7 @@ public class App {
 
 							if (!isLogin()) {
 								continue;
-								
+
 							} else {
 								clickHitMember.setClickHitNum(clickHitMember.getClickHitNum() + 1);
 								target.setHit(target.getHit() + 1);
@@ -229,6 +230,73 @@ public class App {
 					loginedMember = null;
 				}
 			}
+			if (cmd.equals("article sort")) {
+
+				System.out.println("정렬 대상을 선택해주세요. (like : 좋아요,  hit : 조회수) :");
+				String sortType = sc.nextLine();
+				System.out.println("정렬 방법을 선택해주세요. (asc : 오름차순,  desc : 내림차순) :");
+				String sortOrder = sc.nextLine();
+				MyComparator comp = new MyComparator();
+				comp.sortOrder = sortOrder;
+				// 조회수로 오름차순
+				ArrayList<Article> articles = articleDao.getArticles();
+				Collections.sort(articles, comp);
+				printArticles(articles);
+
+			}
+			if (cmd.equals("article page")) {
+				ArrayList<Article> articles = articleDao.getArticles();
+				int lastPage = 0;
+				for (int j = lastPage; j < lastPage + 3; j++) {
+					Article article = articles.get(j);
+					System.out.println("번호 : " + article.getId());
+					System.out.println("제목 : " + article.getTitle());
+					System.out.println("등록날짜 : " + article.getRegDate());
+					System.out.println("작성자 : " + article.getNickname());
+					System.out.println("조회수 : " + article.getHit());
+					System.out.println("===================");
+				}
+				while (true) {
+					System.out.println("prev : 이전, next : 다음, go : 선택, back : 뒤로가기");
+					String pageCmd = sc.nextLine();
+					if (pageCmd.equals("back")) {
+						break;
+					} else if (pageCmd.equals("next")) {
+						System.out.println("test");
+						lastPage = +3;
+						System.out.println("test2");
+						for (int j = lastPage; j < articles.size() && j < lastPage + 3; j++) {
+							System.out.println("test3");
+
+							Article article = articles.get(j);
+							if (j == articles.size()) {
+								break;
+							}
+							System.out.println("번호 : " + article.getId());
+							System.out.println("제목 : " + article.getTitle());
+							System.out.println("등록날짜 : " + article.getRegDate());
+							System.out.println("작성자 : " + article.getNickname());
+							System.out.println("조회수 : " + article.getHit());
+							System.out.println("===================");
+						}
+					} else if (pageCmd.equals("prev")) {
+
+						lastPage = -3;
+						for (int i = lastPage; i < articles.size(); i++) {
+							for (int j = lastPage; j < lastPage + 3; j++) {
+								Article article = articles.get(j);
+								System.out.println("번호 : " + article.getId());
+								System.out.println("제목 : " + article.getTitle());
+								System.out.println("등록날짜 : " + article.getRegDate());
+								System.out.println("작성자 : " + article.getNickname());
+								System.out.println("조회수 : " + article.getHit());
+								System.out.println("===================");
+							}
+
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -290,5 +358,32 @@ public class App {
 			target.setBody(newBody);
 		}
 		return target;
+	}
+
+	class MyComparator implements Comparator<Article> {
+
+		String sortOrder = "asc";
+		String sortType = "hit";
+
+		@Override
+		public int compare(Article o1, Article o2) {
+			int c1 = o1.getHit();
+			int c2 = o2.getHit();
+
+			if (sortOrder.equals("asc")) {
+				if (c1 > c2) {
+					return 1;
+				}
+
+				return -1;
+			} else {
+				if (c1 < c2) {
+					return 1;
+				}
+
+				return -1;
+			}
+		}
+
 	}
 }

@@ -13,12 +13,12 @@ public class Article {
 	}
 
 
-	public Article(int id, String title, String body, String nickname, String regDate) {
+	public Article(int id, String title, String body, int mid, String regDate, int hit) {
 		this.id = id;
 		this.title = title;
 		this.body = body;
-		this.nickname = nickname;
 		this.regDate = regDate;
+		this.hit = hit;
 	}
 
 	public int getId() {
