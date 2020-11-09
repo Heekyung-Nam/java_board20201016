@@ -246,8 +246,17 @@ public class App {
 			}
 			if (cmd.equals("article page")) {
 				ArrayList<Article> articles = articleDao.getArticles();
-				int lastPage = 0;
-				for (int j = lastPage; j < lastPage + 3; j++) {
+				
+				int itemStartNo = 1;
+				int currentPage = 1;
+				int itemPerPage = 3;
+				int lastPage = (int) Math.ceil((double) articles.size() / itemPerPage);
+				int pagePerBlock = 5;
+				int currentBlockLocation = (int) Math.ceil((double) currentPage / pagePerBlock);
+				int endBlockNo = currentBlockLocation + pagePerBlock + 1;
+				int startBlockNo = endBlockNo - pagePerBlock;
+
+				for (int j = itemStartNo; j < pagePerBlock && j < articles.size(); j++) {
 					Article article = articles.get(j);
 					System.out.println("번호 : " + article.getId());
 					System.out.println("제목 : " + article.getTitle());
@@ -255,18 +264,28 @@ public class App {
 					System.out.println("작성자 : " + article.getNickname());
 					System.out.println("조회수 : " + article.getHit());
 					System.out.println("===================");
+					itemStartNo =+ pagePerBlock;
 				}
+				for(int i = startBlockNo; i < endBlockNo ; i++) {
+					if (currentPage == i) {
+					System.out.println("[" + i + "] ");
+				} else {
+					System.out.println(i + " ");
+				}
+			}
+				
 				while (true) {
 					System.out.println("prev : 이전, next : 다음, go : 선택, back : 뒤로가기");
 					String pageCmd = sc.nextLine();
 					if (pageCmd.equals("back")) {
 						break;
 					} else if (pageCmd.equals("next")) {
-						System.out.println("test");
-						lastPage = +3;
-						System.out.println("test2");
-						for (int j = lastPage; j < articles.size() && j < lastPage + 3; j++) {
-							System.out.println("test3");
+						lastPage = +articlePerPage;
+						for (int j = lastPage; j < articles.size() && j < lastPage + articlePerPage; j++) {
+
+							if (articles.isEmpty()) {
+								System.out.println("게시물이 없습니다.");
+							}
 
 							Article article = articles.get(j);
 							if (j == articles.size()) {
@@ -281,9 +300,9 @@ public class App {
 						}
 					} else if (pageCmd.equals("prev")) {
 
-						lastPage = -3;
+						lastPage = -articlePerPage;
 						for (int i = lastPage; i < articles.size(); i++) {
-							for (int j = lastPage; j < lastPage + 3; j++) {
+							for (int j = lastPage; j < lastPage + articlePerPage; j++) {
 								Article article = articles.get(j);
 								System.out.println("번호 : " + article.getId());
 								System.out.println("제목 : " + article.getTitle());
