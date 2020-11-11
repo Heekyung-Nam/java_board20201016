@@ -56,15 +56,8 @@ public class App {
 
 			if (cmd.equals("article list")) {
 				ArrayList<Article> articles = articleDao.getArticles();
+				printArticles(articles, 1);
 
-				for (int i = 0; i < articles.size(); i++) {
-					Article article = articles.get(i);
-					System.out.println("번호 : " + article.getId());
-					System.out.println("제목 : " + article.getTitle());
-					System.out.println("작성자 : " + article.getNickname());
-					System.out.println("조회수 : " + read_num);
-					System.out.println("===================");
-				}
 			}
 
 			if (cmd.equals("article update")) {
@@ -140,215 +133,199 @@ public class App {
 
 							if (!isLogin()) {
 								continue;
+								Like rst = likeDao.getLikeByArticleIdAndMemberId(target.getId(), loginedMember.getId());
+								if (rst == null) {
+									Like like = new Like(target.getId(), loginedMember.getId());
+									likeDao.insertLike(like);
+									target.setLikeCnt(target.getLikeCnt() + 1);
+									System.out.println("좋아요를 체크했습니다.");
+								} else {
+									// 해제 - 삭제
+									likeDao.removeLike(rst);
+									System.out.println("좋아요를 해제했습니다.");
+									target.setLikeCnt(target.getLikeCnt() - 1);
+								}
 
-							} else {
-								clickHitMember.setClickHitNum(clickHitMember.getClickHitNum() + 1);
-								target.setHit(target.getHit() + 1);
+								printArticle(target);
+
 							}
 
-							if (clickHitMember.getClickHitNum() == 2) {
-								clickHitMember.setClickHitNum(clickHitMember.getClickHitNum() - 1);
-								target.setHit(target.getHit() - 1);
-							}
-
-							printArticles(articles);
-
-						} else if (readCmd == 3) {
 							System.out.println("수정 기능");
 
 							if (!loginedMember.getLoginId().equals(wrighter.getLoginId())) {
-								if (!isLogin()) {
+								if (!isLogin() || !isMyArticle(target)) {
 									continue;
 								}
-								System.out.println("자신의 게시물만 수정/삭제 할 수 있습니다.");
-							} else {
-								ArrayList article = articleDao.getArticles();
-								updateArticle(target);
-								printArticles(article);
-								continue;
-							}
 
-						} else if (readCmd == 4) {
-							System.out.println("삭제 기능");
-						} else if (readCmd == 5) {
-							break;
-						}
-					}
+								System.out.println("게시물 제목을 입력해주세요 :");
+								String newTitle = sc.nextLine();
 
-				}
-			}
-			if (cmd.equals("article search")) {
-				System.out.print("검색항목을 선택해주세요(1. 제목, 2. 내용, 3. 제목 + 내용, 4. 작성자) : ");
-				int flag = Integer.parseInt(sc.nextLine());
-				System.out.print("검색 키워드를 입력해주세요.");
-				String keyword = sc.nextLine();
-				ArrayList<Article> searchedArticles = articleDao.getSearchedArticlesByFlag(flag, keyword);
-				searchedArticles = articleDao.getSearchedArticlesByFlag(flag, keyword);
-				memberDao.getMembers();
-				printArticles(searchedArticles);
+								System.out.println("게시물 내용을 입력해주세요 :");
+								String newBody = sc.nextLine();
+								target.setTitle(newTitle);
+								target.setBody(newBody);
 
-			}
-			if (cmd.equals("member signup")) {
-				Member m = new Member();
-				System.out.println("==== 회원 가입을 진행합니다 ====");
-				System.out.print("아이디를 입력해주세요 : ");
-				String id = sc.nextLine();
-				System.out.print("비밀번호를 입력해주세요 : ");
-				String password = sc.nextLine();
-				System.out.print("닉네임을 입력해주세요 : ");
-				String nickname = sc.nextLine();
-				m.setLoginId(id);
-				m.setLoginPw(password);
-				m.setNickname(nickname);
-				memberDao.insertMember(m);
-				System.out.println("==== 회원가입이 완료되었습니다. ====");
-			}
-			if (cmd.equals("member signin")) {
-				System.out.println("아이디 :");
-				String id = sc.nextLine();
+								printArticle(target);
 
-				System.out.println("비밀번호 :");
-				String pw = sc.nextLine();
+							} else if (readCmd == 4) {
+								if (!isLogin() || !isMyArticle(target)) {
+									continue;
+								}
+								articleDao.removeArticle(target);
+								break;
 
-				Member member = memberDao.getMemberByLoginIdAndLoginPw(id, pw);
-				if (member == null) {
-					System.out.println("비밀번호를 틀렸거나 잘못된 회원정보입니다.");
-				} else {
-					loginedMember = member;
-					System.out.println(loginedMember.getNickname() + "님 안녕하세요!!");
-				}
-			}
-			if (cmd.equals("help")) {
-				System.out.println(
-						"article [add: 게시물 추가 / list : 게시물 목록 조회 / read : 게시물 조회 / search : 검색] / member [signup : 회원가입 / signin : 로그인 / findpass : 비밀번호 찾기 / findid : 아이디 찾기 / logout : 로그아웃 / myinfo : 나의 정보 확인및 수정]");
-			}
-			if (cmd.equals("member logout")) {
-				if (isLogin()) {
-					continue;
-				} else {
-					System.out.println("로그아웃 되었습니다.");
-					loginedMember = null;
-				}
-			}
-			if (cmd.equals("article sort")) {
-
-				System.out.println("정렬 대상을 선택해주세요. (like : 좋아요,  hit : 조회수) :");
-				String sortType = sc.nextLine();
-				System.out.println("정렬 방법을 선택해주세요. (asc : 오름차순,  desc : 내림차순) :");
-				String sortOrder = sc.nextLine();
-				MyComparator comp = new MyComparator();
-				comp.sortOrder = sortOrder;
-				// 조회수로 오름차순
-				ArrayList<Article> articles = articleDao.getArticles();
-				Collections.sort(articles, comp);
-				printArticles(articles);
-
-			}
-			if (cmd.equals("article page")) {
-				ArrayList<Article> articles = articleDao.getArticles();
-
-				int itemPerPage = 3;
-				int itemStartNo = 0;
-				int itemEndNo = itemPerPage;
-				int currentPage = 1;
-				int lastPage = (int) Math.ceil((double) articles.size() / itemPerPage);
-				int pagePerBlock = 5;
-				int currentBlockLocation = (int) Math.ceil((double) currentPage / pagePerBlock);
-				int endBlockNo = currentBlockLocation * pagePerBlock + 1;
-				int startBlockNo = endBlockNo - pagePerBlock;
-
-				for (int j = itemStartNo; j < articles.size() && j < itemEndNo; j++) {
-					Article article = articles.get(j);
-					System.out.println("번호 : " + article.getId());
-					System.out.println("제목 : " + article.getTitle());
-					System.out.println("등록날짜 : " + article.getRegDate());
-					System.out.println("작성자 : " + article.getNickname());
-					System.out.println("조회수 : " + article.getHit());
-					System.out.println("===================");
-				}
-				itemStartNo =+ itemPerPage;
-				System.out.println("\\\\\\"+itemStartNo+"\\\\\\");
-				itemEndNo = itemStartNo + itemPerPage;
-System.out.println("\\\\\\"+itemEndNo+"\\\\\\");
-				for (int i = startBlockNo; i < endBlockNo; i++) {
-					if (currentPage == i) {
-						System.out.print("[" + i + "] ");
-					} else {
-						System.out.print(i + " ");
-					}
-				}
-				endBlockNo = +pagePerBlock;
-
-				while (true) {
-					System.out.println("prev : 이전, next : 다음, go : 선택, back : 뒤로가기");
-					String pageCmd = sc.nextLine();
-					if (pageCmd.equals("back")) {
-						break;
-					} else if (pageCmd.equals("next")) {
-						System.out.println("==="+itemStartNo+"===");
-						System.out.println("==="+itemEndNo+"===");
-						if(itemEndNo > articles.size()) {
-							continue;
-						}
-						for (int j = itemStartNo;j < itemEndNo; j++) {
-							System.out.println("test2");  
-							Article article = articles.get(j);
-
-							if (articles.isEmpty()) {
-								System.out.println("게시물이 없습니다.");
-							}
-
-							if (j == articles.size()) {
+							} else if (readCmd == 5) {
 								break;
 							}
-							currentPage++;
-							System.out.println("번호 : " + article.getId());
-							System.out.println("제목 : " + article.getTitle());
-							System.out.println("등록날짜 : " + article.getRegDate());
-							System.out.println("작성자 : " + article.getNickname());
-							System.out.println("조회수 : " + article.getHit());
-							System.out.println("===================");
 						}
-						itemStartNo =+ itemPerPage;
-						itemEndNo =+ itemPerPage;
-						for (int i = startBlockNo; i < endBlockNo && i < lastPage; i++) {
-							if (currentPage == i) {
-								System.out.print("[" + i + "] ");
-							} else {
-								System.out.print(i + " ");
-							}
+
+					}
+				}
+				if (cmd.equals("article search")) {
+					System.out.print("검색항목을 선택해주세요(1. 제목, 2. 내용, 3. 제목 + 내용, 4. 작성자) : ");
+					int flag = Integer.parseInt(sc.nextLine());
+					System.out.print("검색 키워드를 입력해주세요.");
+					String keyword = sc.nextLine();
+					ArrayList<Article> searchedArticles = articleDao.getSearchedArticlesByFlag(flag, keyword);
+					searchedArticles = articleDao.getSearchedArticlesByFlag(flag, keyword);
+					memberDao.getMembers();
+					printArticles(searchedArticles, 1);
+
+				}
+				if (cmd.equals("member signup")) {
+					Member m = new Member();
+					System.out.println("==== 회원 가입을 진행합니다 ====");
+					System.out.print("아이디를 입력해주세요 : ");
+					String id = sc.nextLine();
+					System.out.print("비밀번호를 입력해주세요 : ");
+					String password = sc.nextLine();
+					System.out.print("닉네임을 입력해주세요 : ");
+					String nickname = sc.nextLine();
+					m.setLoginId(id);
+					m.setLoginPw(password);
+					m.setNickname(nickname);
+					memberDao.insertMember(m);
+					System.out.println("==== 회원가입이 완료되었습니다. ====");
+				}
+				if (cmd.equals("member signin")) {
+					System.out.println("아이디 :");
+					String id = sc.nextLine();
+
+					System.out.println("비밀번호 :");
+					String pw = sc.nextLine();
+
+					Member member = memberDao.getMemberByLoginIdAndLoginPw(id, pw);
+					if (member == null) {
+						System.out.println("비밀번호를 틀렸거나 잘못된 회원정보입니다.");
+					} else {
+						loginedMember = member;
+						System.out.println(loginedMember.getNickname() + "님 안녕하세요!!");
+					}
+				}
+				if (cmd.equals("help")) {
+					System.out.println(
+							"article [add: 게시물 추가 / list : 게시물 목록 조회 / read : 게시물 조회 / search : 검색] / member [signup : 회원가입 / signin : 로그인 / findpass : 비밀번호 찾기 / findid : 아이디 찾기 / logout : 로그아웃 / myinfo : 나의 정보 확인및 수정]");
+				}
+				if (cmd.equals("member logout")) {
+					if (isLogin()) {
+						continue;
+					} else {
+						System.out.println("로그아웃 되었습니다.");
+						loginedMember = null;
+					}
+				}
+				if (cmd.equals("article sort")) {
+
+					System.out.println("정렬 대상을 선택해주세요. (like : 좋아요,  hit : 조회수) :");
+					String sortType = sc.nextLine();
+					System.out.println("정렬 방법을 선택해주세요. (asc : 오름차순,  desc : 내림차순) :");
+					String sortOrder = sc.nextLine();
+					MyComparator comp = new MyComparator();
+					comp.sortOrder = sortOrder;
+					// 조회수로 오름차순
+					ArrayList<Article> articles = articleDao.getArticles();
+					Collections.sort(articles, comp);
+					printArticles(articles);
+
+				}
+				if (cmd.equals("article page")) {
+					ArrayList<Article> articles = articleDao.getArticles();
+					int currentPageNo = 1;
+					printArticles(articles, currentPageNo);
+
+					while (true) {
+						String pageCmd = sc.nextLine();
+						if (pageCmd.equals("next")) {
+							currentPageNo++;
+							printArticles(articles, currentPageNo);
+						} else if (pageCmd.equals("back")) {
+							break;
 						}
-						endBlockNo = +pagePerBlock;
-					} else if (pageCmd.equals("prev")) {
-						if(itemStartNo < 0) {
-							itemStartNo = 0;
-						}
-						itemStartNo -= itemPerPage;
-						for (int j = itemStartNo; j < articles.size() && j < itemStartNo + itemPerPage; j++) {
-							Article article = articles.get(j);
-							System.out.println("번호 : " + article.getId());
-							System.out.println("제목 : " + article.getTitle());
-							System.out.println("등록날짜 : " + article.getRegDate());
-							System.out.println("작성자 : " + article.getNickname());
-							System.out.println("조회수 : " + article.getHit());
-							System.out.println("===================");
-						}
+
 					}
 				}
 			}
 		}
 	}
 
-	private void printArticles(ArrayList<Article> articleList) {
-		for (int i = 0; i < articleList.size(); i++) {
+	private void printArticles(ArrayList<Article> articleList, int currentPageNo) {
+		int totalCntOfItems = articleList.size(); // 전체 게시물 개수
+		int startPageNo = 1; // 시작 페이지 번호
+		int itemsCntPerPage = 3; // 페이지당 출력 게시물 개수
+		int pageCntPerBlock = 5; // 한 페이지 블록 당 페이지 개수
+		int endPageNo = (int) Math.ceil((double) totalCntOfItems / itemsCntPerPage); // 마지막 페이지 번호
+
+		// 현재 페이지가 시작페이지보다 작으면 안됨
+		if (currentPageNo < startPageNo) {
+			currentPageNo = startPageNo;
+		}
+		// 현재 페이지가 마지막페이지보다 크면 안됨
+		if (currentPageNo > endPageNo) {
+			currentPageNo = endPageNo;
+		}
+
+		int currentPageBlock = (int) Math.ceil((double) currentPageNo / pageCntPerBlock); // 현재 페이지 블록
+		int startPageNoInBlock = (currentPageBlock - 1) * pageCntPerBlock + 1; // 현재 페이지 블록의 시작 페이지 번호
+		int endPageNoInBlock = startPageNoInBlock + pageCntPerBlock - 1;// // 현재 페이지 블록의 마지막 페이지 번호
+
+		// 페이지 번호가 마지막 페이지를 넘으면 안됨
+		if (endPageNoInBlock > endPageNo) {
+			endPageNoInBlock = endPageNo;
+		}
+		// 해당 페이지의 게시물 목록의 첫 인덱스
+		int startIndex = (currentPageNo - 1) * itemsCntPerPage;
+
+		// 해당 페이지의 게시물 목록의 마지막 인덱스
+		int endIndex = startIndex + itemsCntPerPage;
+
+		// 페이지의 마지막 인덱스가 저장소의 마지막 인덱스보다 크면 안됨
+		if (endIndex > totalCntOfItems) {
+			endIndex = totalCntOfItems;
+		}
+		System.out.println(endPageNoInBlock);
+		for (int i = startIndex; i < endIndex; i++) {
 			Article article = articleList.get(i);
 			System.out.println("번호 : " + article.getId());
 			System.out.println("제목 : " + article.getTitle());
 			System.out.println("등록날짜 : " + article.getRegDate());
-			System.out.println("작성자 : " + article.getNickname());
+			
+
+			Member regMember = memberDao.getMemberById(article.getMid());
+			System.out.println("작성자 : " + regMember.getNickname());
 			System.out.println("조회수 : " + article.getHit());
+			System.out.println("좋아요 : " + article.getLikeCnt());
 			System.out.println("===================");
 		}
+
+		for (int i = startPageNoInBlock; i <= endPageNoInBlock; i++) {
+
+			if (i == currentPageNo) {
+				System.out.print("[" + i + "] ");
+			} else {
+				System.out.print(i + " ");
+			}
+		}
+		System.out.println("");
 	}
 
 	private void printReplies(ArrayList<Reply> replyList) {
